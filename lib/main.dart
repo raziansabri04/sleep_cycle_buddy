@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
+import 'package:sleep_cycle_buddy/screens/dashboard_screen.dart';
 
 void main() {
   runApp(const SleepCycleApp());
@@ -52,11 +53,11 @@ class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const Center(child: Text("Dashboard Screen", style: TextStyle(fontSize: 20))),
-    const Center(child: Text("Log Screen", style: TextStyle(fontSize: 20))),
-    const Center(child: Text("Insights Screen", style: TextStyle(fontSize: 20))),
-    const Center(child: Text("Relax Screen", style: TextStyle(fontSize: 20))),
-    const Center(child: Text("Profile Screen", style: TextStyle(fontSize: 20))),
+    const DashboardScreen(), // Ganti teks placeholder dengan Widget asli
+    const Center(child: Text("Log Screen")),
+    const Center(child: Text("Insights Screen")),
+    const Center(child: Text("Relax Screen")),
+    const Center(child: Text("Profile Screen")),
   ];
 
   @override
