@@ -70,7 +70,7 @@ class _SleepLogScreenState extends State<SleepLogScreen> {
               subtitle: "No screens 1h before bed",
               trailing: Switch(
                 value: isLimitedScreenTime,
-                activeColor: const Color(0xFFFFB95A),
+                activeThumbColor: const Color(0xFFFFB95A),
                 onChanged: (val) => setState(() => isLimitedScreenTime = val),
               ),
             ),
@@ -162,7 +162,7 @@ class _SleepLogScreenState extends State<SleepLogScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF5356FB).withOpacity(0.3) : Colors.transparent,
+                  color: isSelected ? const Color(0xFF5356FB).withValues(alpha: 0.3) : Colors.transparent,
                   shape: BoxShape.circle,
                   border: isSelected ? Border.all(color: const Color(0xFF5356FB)) : null,
                 ),

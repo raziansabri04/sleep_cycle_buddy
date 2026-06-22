@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sleep_cycle_buddy/screens/dashboard_screen.dart';
 import 'package:sleep_cycle_buddy/screens/sleep_log_screen.dart';
 import 'package:sleep_cycle_buddy/screens/insight_screen.dart';
+import 'package:sleep_cycle_buddy/screens/relax_screen.dart';
+import 'package:sleep_cycle_buddy/screens/profile_screen.dart';
+import 'package:sleep_cycle_buddy/screens/login_screen.dart';
 
-void main() {
+void main() async {
+  // 1. Pastikan binding Flutter sudah siap
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 2. Inisialisasi Firebase dengan opsi sesuai platform (Android/iOS)
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const SleepCycleApp());
 }
 
@@ -39,7 +52,7 @@ class SleepCycleApp extends StatelessWidget {
 
         useMaterial3: true,
       ),
-      home: const MainNavigation(),
+      home: const LoginScreen(),
     );
   }
 }
@@ -58,8 +71,8 @@ class _MainNavigationState extends State<MainNavigation> {
     const DashboardScreen(),
     const SleepLogScreen(),
     const InsightScreen(),
-    const Center(child: Text("Relax Screen")),
-    const Center(child: Text("Profile Screen")),
+    const RelaxScreen(),
+    const ProfileScreen(),
   ];
 
   @override

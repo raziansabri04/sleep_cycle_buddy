@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "788986962796",
+    "project_id": "sleep-cycle-buddy",
+    "storage_bucket": "sleep-cycle-buddy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:788986962796:android:905bec34ba0e3be3d30949",
+        "android_client_info": {
+          "package_name": "com.example.sleep_cycle_buddy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxAuWNZJTp1q9E26a50cs1W7-rb2SAR6o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
