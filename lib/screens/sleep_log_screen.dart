@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SleepLogScreen extends StatefulWidget {
   const SleepLogScreen({super.key});
@@ -13,6 +15,52 @@ class _SleepLogScreenState extends State<SleepLogScreen> {
   int selectedEmoji = 2; // Default: Good
   int caffeineCount = 2;
   bool isLimitedScreenTime = true;
+
+  // 1. TAMBAHKAN VARIABLE LOADING INI
+  bool _isSaving = false;
+
+  // 2. TAMBAHKAN FUNGSI UNTUK MENYIMPAN KE FIRESTORE INI
+  Future<void> _saveLog() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    // Cek jika user tidak login
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Silakan login terlebih dahulu")),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true); // Mulai loading
+
+    try {
+      // Menyimpan data ke koleksi "sleep_logs" di Firebase
+      await FirebaseFirestore.instance.collection('sleep_logs').add({
+        'userId': user.uid,
+        'email': user.email,
+        'date': DateTime.now(),
+        'sleepRating': selectedEmoji, // 0-4
+        'caffeineCount': caffeineCount,
+        'isLimitedScreenTime': isLimitedScreenTime,
+        'activeMinutes': 45,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Data tidur berhasil disimpan ke Cloud!")),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Gagal menyimpan: $e")),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false); // Berhenti loading
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,19 +137,24 @@ class _SleepLogScreenState extends State<SleepLogScreen> {
 
             const SizedBox(height: 40),
 
-            // 4. Save Button
+            // 3. UBAH BAGIAN TOMBOL SAVE INI
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Log Saved!")));
-                },
+                // Tombol memanggil fungsi _saveLog
+                onPressed: _isSaving ? null : _saveLog,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFFB95A),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                 ),
-                child: const Text("Save", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
+                child: _isSaving
+                    ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2)
+                )
+                    : const Text("Save", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             ),
             const SizedBox(height: 40),
@@ -111,6 +164,7 @@ class _SleepLogScreenState extends State<SleepLogScreen> {
     );
   }
 
+  // ... (Sisa fungsi _buildScheduleCard, _timeInfo, _buildEmojiRating, dsb tetap sama)
   Widget _buildScheduleCard() {
     return Container(
       padding: const EdgeInsets.all(20),

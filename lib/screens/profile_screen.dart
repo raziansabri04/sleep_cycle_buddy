@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sleep_cycle_buddy/screens/personal_info_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:sleep_cycle_buddy/screens/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -89,7 +91,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             // 4. Log Out Button
             TextButton.icon(
-              onPressed: () {},
+              onPressed: () async {
+                // 1. Jalankan fungsi Sign Out dari Firebase
+                await FirebaseAuth.instance.signOut();
+
+                // 2. Jika proses berhasil, pindah ke halaman Login
+                if (mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                        (route) => false, // Hapus semua riwayat halaman agar tidak bisa 'back'
+                  );
+                }
+              },
               icon: const Icon(Icons.logout, color: Colors.white70),
               label: const Text("Log Out", style: TextStyle(color: Colors.white70)),
               style: TextButton.styleFrom(
