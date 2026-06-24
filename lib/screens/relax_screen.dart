@@ -255,12 +255,12 @@ class _RelaxScreenState extends State<RelaxScreen> {
             Text("Gentle Wake Alarm", style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 15),
 
-            ElevatedButton(
+            /*ElevatedButton(
               onPressed: _testInstant,
               style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
               child: const Text("KLIK UNTUK TES SUARA SEKARANG", style: TextStyle(color: Colors.white, fontSize: 10)),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 10),*/
 
             GestureDetector(
               onTap: _pickTime,
