@@ -68,9 +68,6 @@ class InsightScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 60),
-                _buildHeader(user?.displayName ?? "User"),
-                const SizedBox(height: 30),
-
                 Text("Sleep Insights", style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 20),
 

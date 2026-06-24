@@ -8,6 +8,7 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:alarm/alarm.dart';
+import 'dart:async';
 
 class RelaxScreen extends StatefulWidget {
   const RelaxScreen({super.key});
@@ -25,6 +26,9 @@ class _RelaxScreenState extends State<RelaxScreen> {
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   TimeOfDay selectedTime = const TimeOfDay(hour: 7, minute: 30);
+
+  Timer? _timer; // Objek pengatur waktu
+  int? _activeTimerMinutes; // Untuk menandai tombol mana yang aktif (15, 30, atau 60)
 
   String selectedAlarmSound = "Custom Alarm Suara 1"; // Default
   final List<String> alarmSounds = [
@@ -47,6 +51,7 @@ class _RelaxScreenState extends State<RelaxScreen> {
 
   @override
   void dispose() {
+    _timer?.cancel();
     _audioPlayer.dispose(); // Mematikan mesin audio saat aplikasi ditutup
     super.dispose();
   }
@@ -83,13 +88,44 @@ class _RelaxScreenState extends State<RelaxScreen> {
   Future<void> _toggleRain() async {
     if (isPlayingRain) {
       await _audioPlayer.stop();
+      _timer?.cancel(); // Hentikan timer jika musik dimatikan manual
     } else {
-      // Pastikan nama file sesuai dengan yang di pubspec.yaml
       await _audioPlayer.play(AssetSource('audio/rain.mp3'));
       await _audioPlayer.setVolume(rainVolume);
+
+      // --- LOGIKA BARU: MULAI TIMER SAAT PLAY ---
+      if (_activeTimerMinutes != null) {
+        _timer?.cancel(); // Bersihkan timer lama jika ada
+        _timer = Timer(Duration(minutes: _activeTimerMinutes!), () async {
+          if (isPlayingRain) {
+            await _audioPlayer.stop();
+            setState(() {
+              isPlayingRain = false;
+              _activeTimerMinutes = null; // Reset pilihan setelah selesai
+            });
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Sleep timer finished!"))
+              );
+            }
+          }
+        });
+      }
     }
     setState(() {
       isPlayingRain = !isPlayingRain;
+    });
+  }
+
+  void _selectSleepTimer(int minutes) {
+    setState(() {
+      // Jika menekan tombol yang sama, kita batalkan pilihan (toggle)
+      if (_activeTimerMinutes == minutes) {
+        _activeTimerMinutes = null;
+        _timer?.cancel(); // Hentikan timer jika sedang berjalan
+      } else {
+        _activeTimerMinutes = minutes;
+      }
     });
   }
 
@@ -244,14 +280,6 @@ class _RelaxScreenState extends State<RelaxScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 60),
-            Row(
-              children: [
-                const CircleAvatar(radius: 20, backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=alex')),
-                const SizedBox(width: 12),
-                Text("Good evening, ${user?.displayName ?? 'User'}", style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w600)),
-              ],
-            ),
-            const SizedBox(height: 30),
             Text("Gentle Wake Alarm", style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 15),
 
@@ -331,23 +359,85 @@ class _RelaxScreenState extends State<RelaxScreen> {
     );
   }
 
-  Widget _buildSoundCard({required String title, required String subtitle, required IconData icon, required bool isPlaying, required double volume, required VoidCallback onPlayTap, required ValueChanged<double> onVolumeChanged}) {
+  Widget _buildSoundCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isPlaying,
+    required double volume,
+    required VoidCallback onPlayTap,
+    required ValueChanged<double> onVolumeChanged,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: const Color(0xFF1A1C2E), borderRadius: BorderRadius.circular(24)),
-      child: Column(children: [
-        Row(children: [
-          Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFF252841), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: const Color(0xFFFFB95A))),
-          const SizedBox(width: 15),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 11))])),
-          IconButton(onPressed: onPlayTap, icon: Icon(isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled), color: const Color(0xFFFFB95A), iconSize: 40)
-        ]),
-        const SizedBox(height: 10),
-        Row(children: [
-          const Text("VOLUME", style: TextStyle(fontSize: 8, color: Colors.grey)),
-          Expanded(child: Slider(value: volume, activeColor: const Color(0xFFFFB95A), onChanged: onVolumeChanged)),
-          Text("${(volume * 100).toInt()}%", style: const TextStyle(fontSize: 8, color: Colors.grey)),
-        ])
-      ]),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(color: const Color(0xFF1A1C2E), borderRadius: BorderRadius.circular(24)),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: const Color(0xFF252841), borderRadius: BorderRadius.circular(12)),
+                child: Icon(icon, color: const Color(0xFFFFB95A)),
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                  ],
+                ),
+              ),
+              IconButton(onPressed: onPlayTap, icon: Icon(isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled), color: const Color(0xFFFFB95A), iconSize: 40)
+            ],
+          ),
+          const SizedBox(height: 10),
+          // Slider Volume
+          Row(
+            children: [
+              const Text("VOLUME", style: TextStyle(fontSize: 8, color: Colors.grey)),
+              Expanded(child: Slider(value: volume, activeColor: const Color(0xFFFFB95A), onChanged: onVolumeChanged)),
+              Text("${(volume * 100).toInt()}%", style: const TextStyle(fontSize: 8, color: Colors.grey)),
+            ],
+          ),
+
+          // --- TAMBAHAN: UI SLEEP TIMER ---
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Icon(Icons.timer_outlined, size: 14, color: Colors.grey),
+              const SizedBox(width: 8),
+              const Text("SLEEP TIMER", style: TextStyle(fontSize: 8, color: Colors.grey)),
+              const Spacer(),
+              _timerChip(15),
+              const SizedBox(width: 8),
+              _timerChip(30),
+              const SizedBox(width: 8),
+              _timerChip(60),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget kecil untuk tombol menit
+  Widget _timerChip(int minutes) {
+    bool isSelected = _activeTimerMinutes == minutes;
+    return GestureDetector(
+      onTap: () => _selectSleepTimer(minutes),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFFB95A) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: isSelected ? Colors.transparent : Colors.white10),
+        ),
+        child: Text("${minutes}m",
+            style: TextStyle(fontSize: 10, color: isSelected ? Colors.black : Colors.grey, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+      ),
     );
   }
 }

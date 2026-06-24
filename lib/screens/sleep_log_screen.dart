@@ -80,15 +80,7 @@ class _SleepLogScreenState extends State<SleepLogScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 60),
-
             // Header
-            Row(children: [
-              const CircleAvatar(radius: 20, backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=riyan')),
-              const SizedBox(width: 12),
-              Text("Good evening, ${user?.displayName ?? 'User'}", style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w600)),
-            ]),
-            const SizedBox(height: 30),
-
             // 1. Rest Schedule Card (INTERAKTIF & TANPA TANGGAL)
             _buildScheduleCard(),
             const SizedBox(height: 25),
