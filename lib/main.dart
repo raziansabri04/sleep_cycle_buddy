@@ -8,15 +8,38 @@ import 'package:sleep_cycle_buddy/screens/insight_screen.dart';
 import 'package:sleep_cycle_buddy/screens/relax_screen.dart';
 import 'package:sleep_cycle_buddy/screens/profile_screen.dart';
 import 'package:sleep_cycle_buddy/screens/login_screen.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:alarm/alarm.dart';
+import 'package:sleep_cycle_buddy/screens/ring_screen.dart';
+
+final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   // 1. Pastikan binding Flutter sudah siap
   WidgetsFlutterBinding.ensureInitialized();
 
+  tz.initializeTimeZones();
+
+  final currentTimeZone = await FlutterTimezone.getLocalTimezone();
+  tz.setLocalLocation(tz.getLocation(currentTimeZone.identifier));
+
+  await Alarm.init();
+
   // 2. Inisialisasi Firebase dengan opsi sesuai platform (Android/iOS)
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Listener: setiap alarm bunyi, otomatis pindah ke RingScreen
+  Alarm.ringing.listen((alarmSet) {
+    for (final alarm in alarmSet.alarms) {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (context) => RingScreen(alarmSettings: alarm)),
+      );
+    }
+  });
 
   runApp(const SleepCycleApp());
 }
@@ -27,6 +50,7 @@ class SleepCycleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'SleepCycle Buddy',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
