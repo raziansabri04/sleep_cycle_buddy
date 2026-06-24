@@ -14,8 +14,11 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool isNotificationEnabled = true;
 
+  // Di dalam build method ProfileScreen
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser; // Ambil data user login
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -25,32 +28,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
-            const SizedBox(height: 20),
-
-            // 1. Header Profil
+            // Header Profil
             Center(
               child: Column(
                 children: [
-                  Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      const CircleAvatar(
-                        radius: 50,
-                        backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=alex'),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(color: Color(0xFFFFB95A), shape: BoxShape.circle),
-                        child: const Icon(Icons.camera_alt, size: 16, color: Colors.black),
-                      )
-                    ],
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundImage: NetworkImage(user?.photoURL ?? 'https://i.pravatar.cc/150?u=alex'),
                   ),
                   const SizedBox(height: 15),
-                  Text("Alex Reston", style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.bold)),
-                  const Text("Dreamer since Oct 2023", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  // NAMA ASLI DARI FIREBASE
+                  Text(user?.displayName ?? "No Name", style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.bold)),
+                  Text(user?.email ?? "", style: const TextStyle(color: Colors.grey, fontSize: 12)),
                 ],
               ),
             ),

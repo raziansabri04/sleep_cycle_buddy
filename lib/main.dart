@@ -67,16 +67,22 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    const DashboardScreen(),
-    const SleepLogScreen(),
-    const InsightScreen(),
-    const RelaxScreen(),
-    const ProfileScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
+
+    final List<Widget> _screens = [
+      // Kirim perintah pindah ke index 3 (Relax) melalui DashboardScreen
+      DashboardScreen(onStartSleeping: () {
+        setState(() {
+          _selectedIndex = 3;
+        });
+      }),
+      const SleepLogScreen(),
+      const InsightScreen(),
+      const RelaxScreen(),
+      const ProfileScreen(),
+    ];
+
     return Scaffold(
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(

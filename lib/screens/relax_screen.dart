@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // 1. Tambah import
+import 'package:firebase_auth/firebase_auth.dart';    // 2. Tambah import
 
 class RelaxScreen extends StatefulWidget {
   const RelaxScreen({super.key});
@@ -9,13 +11,70 @@ class RelaxScreen extends StatefulWidget {
 }
 
 class _RelaxScreenState extends State<RelaxScreen> {
-  // State untuk kontrol suara dummy
+  final user = FirebaseAuth.instance.currentUser;
+
+  // 3. Tambahkan variable waktu default (07:30)
+  TimeOfDay selectedTime = const TimeOfDay(hour: 7, minute: 30);
+
   bool isPlayingRain = false;
   double rainVolume = 0.6;
   bool isPlayingOcean = false;
 
   @override
+  void initState() {
+    super.initState();
+    _loadAlarmFromFirebase(); // Ambil jam yang tersimpan saat halaman dibuka
+  }
+
+  // 4. FUNGSI UNTUK MEMUNCULKAN PILIHAN JAM (Time Picker)
+  Future<void> _pickTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+    );
+    if (picked != null && picked != selectedTime) {
+      setState(() {
+        selectedTime = picked;
+      });
+      _saveAlarmToFirebase(picked); // Langsung simpan ke cloud
+    }
+  }
+
+  // 5. FUNGSI SIMPAN JAM KE FIREBASE
+  Future<void> _saveAlarmToFirebase(TimeOfDay time) async {
+    try {
+      String timeStr = "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
+      await FirebaseFirestore.instance.collection('users').doc(user?.uid).set({
+        'alarmTime': timeStr,
+      }, SetOptions(merge: true));
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Alarm updated!")),
+        );
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  // 6. FUNGSI AMBIL JAM DARI FIREBASE
+  Future<void> _loadAlarmFromFirebase() async {
+    final doc = await FirebaseFirestore.instance.collection('users').doc(user?.uid).get();
+    if (doc.exists && doc.data()?['alarmTime'] != null) {
+      String timeStr = doc.data()?['alarmTime'];
+      List<String> parts = timeStr.split(':');
+      setState(() {
+        selectedTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Format jam agar selalu 2 digit (misal 07:30)
+    String formattedTime = "${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}";
+
     return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -24,28 +83,28 @@ class _RelaxScreenState extends State<RelaxScreen> {
           children: [
             const SizedBox(height: 60),
 
-            // Header
+            // Header (Nama sesuai akun)
             Row(
               children: [
                 const CircleAvatar(radius: 20, backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=alex')),
                 const SizedBox(width: 12),
-                Text("Good evening, Alex", style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w600)),
+                Text("Good evening, ${user?.displayName ?? 'User'}", style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w600)),
               ],
             ),
             const SizedBox(height: 30),
 
-            // 1. Gentle Wake Alarm Card
             Text("Gentle Wake Alarm", style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 15),
-            _buildAlarmCard(),
+
+            // 7. BUNGKUS DENGAN GESTURE DETECTOR AGAR BISA DIKLIK
+            GestureDetector(
+              onTap: _pickTime,
+              child: _buildAlarmCard(formattedTime),
+            ),
 
             const SizedBox(height: 30),
-
-            // 2. Relaxation Sounds Section
             Text("Relaxation Sounds", style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 15),
-
-            // Sound 1: Rain
             _buildSoundCard(
               title: "Rain",
               subtitle: "Soft pitter on a window",
@@ -55,10 +114,7 @@ class _RelaxScreenState extends State<RelaxScreen> {
               onPlayTap: () => setState(() => isPlayingRain = !isPlayingRain),
               onVolumeChanged: (val) => setState(() => rainVolume = val),
             ),
-
             const SizedBox(height: 15),
-
-            // Sound 2: Ocean
             _buildSoundCard(
               title: "Ocean",
               subtitle: "Distant rolling tides",
@@ -68,7 +124,6 @@ class _RelaxScreenState extends State<RelaxScreen> {
               onPlayTap: () => setState(() => isPlayingOcean = !isPlayingOcean),
               onVolumeChanged: (val) {},
             ),
-
             const SizedBox(height: 40),
           ],
         ),
@@ -76,7 +131,8 @@ class _RelaxScreenState extends State<RelaxScreen> {
     );
   }
 
-  Widget _buildAlarmCard() {
+  // 8. UPDATE FUNGSI _buildAlarmCard UNTUK MENERIMA DATA WAKTU
+  Widget _buildAlarmCard(String time) {
     return Container(
       padding: const EdgeInsets.all(25),
       width: double.infinity,
@@ -86,32 +142,36 @@ class _RelaxScreenState extends State<RelaxScreen> {
       ),
       child: Column(
         children: [
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: const [Icon(Icons.alarm, color: Color(0xFFFFB95A), size: 20)],
+            children: [Icon(Icons.alarm, color: Color(0xFFFFB95A), size: 20)],
           ),
-          Text("07:30",
+          Text(time,
               style: GoogleFonts.plusJakartaSans(fontSize: 56, fontWeight: FontWeight.bold, letterSpacing: 2)
           ),
-          const Text("Tomorrow Morning", style: TextStyle(color: Colors.grey)),
+          const Text("Tap to set alarm time", style: TextStyle(color: Colors.grey, fontSize: 12)),
           const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF252841),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.music_note, size: 16, color: Color(0xFFFFB95A)),
-                SizedBox(width: 8),
-                Text("Birds & Morning Dew", style: TextStyle(fontSize: 12)),
-                SizedBox(width: 8),
-                Icon(Icons.chevron_right, size: 16, color: Colors.grey),
-              ],
-            ),
-          )
+          _buildSoundSelector(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSoundSelector() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF252841),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.music_note, size: 16, color: Color(0xFFFFB95A)),
+          SizedBox(width: 8),
+          Text("Birds & Morning Dew", style: TextStyle(fontSize: 12)),
+          SizedBox(width: 8),
+          Icon(Icons.chevron_right, size: 16, color: Colors.grey),
         ],
       ),
     );

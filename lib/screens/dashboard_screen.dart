@@ -5,7 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:firebase_auth/firebase_auth.dart';    // Import Auth
 
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
+
+  final VoidCallback onStartSleeping;
+
+  const DashboardScreen({super.key, required this.onStartSleeping});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +24,7 @@ class DashboardScreen extends StatelessWidget {
             .limit(7)
             .snapshots(),
         builder: (context, snapshot) {
-          // A. CEK JIKA TERJADI ERROR (Tambahkan ini)
+          // A. CEK JIKA TERJADI ERROR
           if (snapshot.hasError) {
             return Center(
               child: Text("Error: ${snapshot.error}",
@@ -123,29 +126,71 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildLastNightCard(Map<String, dynamic> data) {
-    // Konversi rating angka ke teks
-    List<String> labels = ["Poor", "Fair", "Good", "Great", "Best"];
-    String qualityText = labels[data['sleepRating'] ?? 2];
+    // 1. Logika untuk mengubah angka rating (0-4) menjadi teks kualitas
+    List<String> labels = ["Poor quality", "Fair quality", "Good quality", "Great quality", "Best quality"];
+    int ratingIndex = data['sleepRating'] ?? 2;
+    String qualityText = labels[ratingIndex];
 
     return Container(
       padding: const EdgeInsets.all(20),
       width: double.infinity,
-      decoration: BoxDecoration(color: const Color(0xFF1A1C2E), borderRadius: BorderRadius.circular(24)),
+      decoration: BoxDecoration(
+          color: const Color(0xFF1A1C2E),
+          borderRadius: BorderRadius.circular(24),
+          // Efek hiasan bulan di pojok kanan (opsional)
+          image: const DecorationImage(
+            image: NetworkImage('https://i.ibb.co/30Z8L5h/moon-bg.png'), // Gambar bulan dummy
+            alignment: Alignment.topRight,
+            opacity: 0.1,
+          )
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Last Night (Real Data)", style: TextStyle(color: Color(0xFFC8C5CE))),
+          const Text("Last Night", style: TextStyle(color: Color(0xFFC8C5CE), fontSize: 12)),
           const SizedBox(height: 8),
-          // Karena kita belum buat input jam, kita pakai angka statis dulu atau ambil dari data
-          Text("Input: ${data['caffeineCount']} Cups", style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.bold)),
+
+          // Durasi Tidur
+          Text(
+              "${data['sleepHours'] ?? 0}h ${data['sleepMinutes'] ?? 0}m",
+              style: GoogleFonts.plusJakartaSans(fontSize: 32, fontWeight: FontWeight.bold)
+          ),
+
+          // Bintang & Kualitas (Data Nyata dari Database)
           Row(
             children: [
               const Icon(Icons.star, color: Color(0xFFFFB95A), size: 18),
               const SizedBox(width: 4),
-              Text(qualityText, style: const TextStyle(color: Color(0xFFFFB95A))),
+              Text(qualityText, style: const TextStyle(color: Color(0xFFFFB95A), fontWeight: FontWeight.w500)),
             ],
           ),
+
+          const SizedBox(height: 20),
+
+          // Chips REM & DEEP (Sesuai Desain)
+          Row(
+            children: [
+              _buildSleepChip("Rem: 1h 45m"),
+              const SizedBox(width: 10),
+              _buildSleepChip("Deep: 2h 10m"),
+            ],
+          )
         ],
+      ),
+    );
+  }
+
+  // Widget tambahan untuk membuat bulatan kecil (Chip)
+  Widget _buildSleepChip(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFF252841), // Warna sedikit lebih terang dari card
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Text(text,
+          style: const TextStyle(color: Color(0xFFC8C5CE), fontSize: 10, fontWeight: FontWeight.w500)
       ),
     );
   }
@@ -171,7 +216,7 @@ class DashboardScreen extends StatelessWidget {
           Text("Ready for restoration?", style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 30),
           ElevatedButton.icon(
-            onPressed: () {},
+            onPressed: onStartSleeping,
             icon: const Icon(Icons.play_circle_fill, color: Colors.black),
             label: const Text("Start Sleeping", style: TextStyle(color: Colors.black)),
             style: ElevatedButton.styleFrom(

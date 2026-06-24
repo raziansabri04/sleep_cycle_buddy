@@ -16,6 +16,9 @@ class _SleepLogScreenState extends State<SleepLogScreen> {
   int caffeineCount = 2;
   bool isLimitedScreenTime = true;
 
+  int sleepHours = 7;
+  int sleepMinutes = 20;
+
   // 1. TAMBAHKAN VARIABLE LOADING INI
   bool _isSaving = false;
 
@@ -42,6 +45,10 @@ class _SleepLogScreenState extends State<SleepLogScreen> {
         'sleepRating': selectedEmoji, // 0-4
         'caffeineCount': caffeineCount,
         'isLimitedScreenTime': isLimitedScreenTime,
+
+        'sleepHours': sleepHours,
+        'sleepMinutes': sleepMinutes,
+
         'activeMinutes': 45,
         'timestamp': FieldValue.serverTimestamp(),
       });
@@ -85,6 +92,13 @@ class _SleepLogScreenState extends State<SleepLogScreen> {
             // 1. Rest Schedule Card
             _buildScheduleCard(),
             const SizedBox(height: 25),
+
+            Text("Sleep Duration", style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 15),
+            _buildDurationInput(),
+            const SizedBox(height: 30),
+
+            Text("How did you sleep?", style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.bold)),
 
             // 2. Sleep Rating Section
             Text("How did you sleep?", style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -262,6 +276,42 @@ class _SleepLogScreenState extends State<SleepLogScreen> {
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white24)),
         child: Icon(icon, size: 16, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildDurationInput() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: const Color(0xFF1A1C2E), borderRadius: BorderRadius.circular(16)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Column(
+            children: [
+              const Text("HOURS", style: TextStyle(fontSize: 10, color: Colors.grey)),
+              Row(
+                children: [
+                  _circleBtn(Icons.remove, () => setState(() => sleepHours > 0 ? sleepHours-- : null)),
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 15), child: Text("$sleepHours", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
+                  _circleBtn(Icons.add, () => setState(() => sleepHours++)),
+                ],
+              ),
+            ],
+          ),
+          Column(
+            children: [
+              const Text("MINUTES", style: TextStyle(fontSize: 10, color: Colors.grey)),
+              Row(
+                children: [
+                  _circleBtn(Icons.remove, () => setState(() => sleepMinutes >= 5 ? sleepMinutes -= 5 : null)),
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 15), child: Text("$sleepMinutes", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
+                  _circleBtn(Icons.add, () => setState(() => sleepMinutes < 55 ? sleepMinutes += 5 : null)),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
