@@ -45,15 +45,6 @@
 
 ---
 
-## 📸 Tampilan Aplikasi
-*(Saran: Masukkan screenshot aplikasi Anda di sini agar lebih menarik)*
-
-| Home | Log | Insights | Relax |
-| :---: | :---: | :---: | :---: |
-| ![Home](https://via.placeholder.com/150) | ![Log](https://via.placeholder.com/150) | ![Insights](https://via.placeholder.com/150) | ![Relax](https://via.placeholder.com/150) |
-
----
-
 ## 🛠️ Cara Menjalankan Project
 
 1.  **Clone repositori ini:**
