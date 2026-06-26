@@ -97,13 +97,13 @@ Aplikasi ini dikembangkan untuk:
 
 | Login Page | Register Page | Home Dashboard | Sleep Log |
 | :---: | :---: | :---: | :---: |
-| ![Login](screenshots/login.png) | ![Register](screenshots/register.png) | ![Home](screenshots/home.png) | ![Log](screenshots/log.png) |
+| ![Login](screenshots/login.jpeg) | ![Register](screenshots/register.jpeg) | ![Home](screenshots/home.jpeg) | ![Log](screenshots/log.jpeg) |
 
 | Sleep Insights | Relax & Sound | Profile | Personal Info |
 | :---: | :---: | :---: | :---: |
-| ![Insights](screenshots/insight.png) | ![Relax](screenshots/relax.png) | ![Profile](screenshots/profile.png) | ![PersonalInfo](screenshots/personal_info.png) |
+| ![Insights](screenshots/insight.jpeg) | ![Relax](screenshots/relax.jpeg) | ![Profile](screenshots/profile.jpeg) | ![PersonalInfo](screenshots/personal_info.jpeg) |
 
 ---
 Developed by
-Razian Sabri (2308107010050)      
+Razian Sabri (2308107010050)
 Riyan Hadi Samudra (2308107010068)
