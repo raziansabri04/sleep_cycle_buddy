@@ -5,7 +5,7 @@
 ---
 
 ## 📖 Deskripsi Singkat
-SleepCycle Buddy adalah solusi *all-in-one* untuk manajemen tidur. Aplikasi ini mengintegrasikan pelacakan durasi tidur harian, analisis konsumsi kafein, fitur relaksasi suara hujan, hingga sistem alarm pintar dalam satu platform berbasis *Cloud*. Dengan tampilan *Dark Mode* yang menenangkan, aplikasi ini dirancang untuk meminimalkan ketegangan mata sebelum tidur.
+SleepCycle Buddy adalah solusi *all-in-one* untuk manajemen tidur. Aplikasi ini mengintegrasikan pelacakan durasi tidur harian, analisis konsumsi kafein, fitur relaksasi suara hujan, hingga sistem alarm pintar dalam satu platform berbasis *Cloud*. Dengan tampilan *Dark Mode* yang menenangkan, aplikasi ini dirancang untuk meminimalkan ketegangan mata dan tubuh sebelum tidur.
 
 ---
 
